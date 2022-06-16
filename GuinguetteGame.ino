@@ -1,6 +1,6 @@
 #include <FastLED.h>
 #include <eButton.h>
-#include "TM1637.h"
+#include <TM1637Display.h>
 
 /*
  * Definition des couleurs
@@ -32,17 +32,6 @@ const int DISPLAY_DIO_PIN = 23; // Pin DIO de l'afficheur
 const int LEDS_NB = 300;  // Nombre de LEDs sur la guirlande
 
 
-/*
- * Parametres Led Racer
- */
-const CRGB playerColor[4] = {VERT, ROUGE, BLEU, JAUNE}; // Couleurs des LEDs
-
-const int   MAX_TURNS    = 3;     // Nombre de tours necessaires pour gagner
-const float ACCELERATION = 0.03;  // Correspond a la vitesse que l'on gagne en appuyant sur notre bouton
-const float FROTTEMENTS  = 0.5;   // Correspond aux frottements exerces sur chaque personne
-const int   PLAYER_SIZE  = 5;     // Taille d'une voiture en nombre de led
-
-
 
 /*
    Variables de fonctionnement du jeu
@@ -65,7 +54,7 @@ CRGB leds[LEDS_NB];
 int counter = 0;
 
 // Variable de fonctionnement de l'afficheur
-TM1637 displayDigits(DISPLAY_CLK_PIN, DISPLAY_DIO_PIN);
+TM1637Display displayDigits(DISPLAY_CLK_PIN, DISPLAY_DIO_PIN);
 
 // Variables de fonctionnement des boutons
 eButton menuSelectButton;
@@ -83,6 +72,7 @@ Games selectedGame = LedRacer;
 
 // Variables temporelles
 unsigned long lastMillis = 0;
+unsigned long beginTimer = 0;
 
 // Variables de fonctionnement led racer
 struct LedRacerPlayer{  
@@ -120,20 +110,15 @@ void setup() {
   FastLED.addLeds<WS2812B, LEDS_PIN, GRB>(leds, LEDS_NB);
 
   // Initialisation de l'afficheur
-  displayDigits.init();
-  displayDigits.set(BRIGHT_TYPICAL);
+  //displayDigits.init();
+  //displayDigits.set(BRIGHT_TYPICAL);
   
 }
 
 // Fonction appelee en continu
 void loop() {
   // Local variables definition
-  unsigned long ms;
-  float dt;
   bool pressed;
-  int playerId;
-  LedRacerPlayer* player;
-  int ledPosition;
   int ledIdx;
 
   switch (state)
@@ -145,7 +130,7 @@ void loop() {
       // Reduce brightness
       for (ledIdx = 0; ledIdx < LEDS_NB; ledIdx++)
       {
-        leds[ledIdx] /= 50;
+        leds[ledIdx] /= 32;
       }
 
       FastLED.show();
@@ -205,55 +190,7 @@ void loop() {
       break;
 
     case LedRacerPlayerSelect:
-      // Check if select button has been pressed
-      pressed = !digitalRead(MENU_SELECT_PIN);
-      if (menuSelectButton.press(pressed) == Simple)
-      {
-        // Start game
-        ledRacerBegin();
-        state = LedRacerGame;
-      }
-
-      // Check if players are pressing their controller
-      for (playerId = 0; playerId < 4; playerId++)
-      {
-        // Select player
-        player = &ledRacerPlayers[playerId];
-        
-        pressed = !digitalRead(PLAYER_BUTTON_PINS[playerId]);
-        player->isPressed = pressed;
-
-        if (playerButtons[playerId].press(pressed) == Simple)
-        {
-          player->isPresent = true;
-        }
-      }
-
-      // Display player colors if they are present
-      FastLED.clear();
-      
-      for (playerId = 0; playerId < 4; playerId++)
-      {
-        if (ledRacerPlayers[playerId].isPresent)
-        {
-          if (ledRacerPlayers[playerId].isPressed)
-          {
-            for (ledIdx = 0; ledIdx < PLAYER_SIZE; ledIdx++)
-            {
-              leds[2 * playerId * PLAYER_SIZE + ledIdx] = playerColor[playerId];
-            }
-          }
-          else
-          {
-            for (ledIdx = 0; ledIdx < PLAYER_SIZE; ledIdx++)
-            {
-              leds[2 * playerId * PLAYER_SIZE + ledIdx] = playerColor[playerId] / 4;
-            }
-          }
-        }
-      }
-
-      FastLED.show();
+      ledRacerSelectLoop();
       break;
 
     case LedRacerGame:
