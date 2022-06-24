@@ -8,6 +8,58 @@ const float LR_ACCELERATION  = 0.03;  // Correspond a la vitesse que l'on gagne 
 const float LR_FROTTEMENTS   = 0.5;   // Correspond aux LR_FROTTEMENTS exerces sur chaque personne
 const int   LR_PLAYER_TAILLE = 5;     // Taille d'une voiture en nombre de led
 
+/*
+    Led racer variables
+*/
+// Variables de fonctionnement led racer
+struct LedRacerPlayer {
+  bool isPresent;
+  bool isPressed;
+
+  float position;
+  float speed;
+  int turns;
+};
+
+LedRacerPlayer ledRacerPlayers[4] = { { 0 } };
+
+/*
+ * Led racer select menu variables
+ */
+const float LR_SELECT_SPEED = 0.3f;
+ 
+float ledRacerSelectPositions[4] = { 0.3f, 0.2f, 0.1f, 0.0f };
+
+
+/*void ledRacerSelectDisplay()
+{
+  // Time variables computation
+  unsigned long ms = millis();
+  float dt = (ms - lastMillis) * 0.001f;
+  lastMillis = ms;
+
+  // Clear Led strip before printing
+  FastLED.clear();
+  
+  int ledPosition ;
+  for (int playerId = 0; playerId < 4; playerId++)
+  {
+    // Compute new positions
+    ledRacerSelectPositions[playerId] += LR_SELECT_SPEED * dt;
+
+    // Print position with mask
+    ledPosition = LEDS_NB * ledRacerSelectPositions[playerId];
+    
+    for (int ledId = 0; ledId < LR_PLAYER_TAILLE; ledId++)
+    {
+      if (ledPosition + ledId > 0.66f * LEDS_NB && ledPosition + ledId < LEDS_NB)
+      {
+        leds[ledPosition + ledId] = LR_PLAYER_COLORS[playerId];
+      }
+      
+    }
+  }
+}*/
 
 void ledRacerSelectLoop()
 {
@@ -16,7 +68,7 @@ void ledRacerSelectLoop()
   int ledIdx;
   int playerId;
   LedRacerPlayer* player;
-  
+
   // Check if select button has been pressed
   pressed = !digitalRead(MENU_SELECT_PIN);
   if (menuSelectButton.press(pressed) == Simple)
