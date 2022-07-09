@@ -1,18 +1,19 @@
 /*
      Parametres Pong
 */
-const int PG_LEDS_INTENSITY_DIV = 1;    // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le pong
+const int   PG_LEDS_INTENSITY_DIV = 1;      // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le pong
 
-const int   PG_BALL_SIZE        = 5;    // Taille de la balle en nombre de leds
-const float PG_BALL_SPEED       = 0.5;  // Vitesse de la balle
-const float PG_ACCELERATION     = 8;    // Accelleration de la balle a chaque tir, si ACCELERATION = 10 on augmente la vitesse de 10 pourcent a chaque tir
+const int   PG_BALL_SIZE          = 10;     // Taille de la balle en nombre de leds
+const float PG_BALL_SPEED         = 0.2;    // Vitesse de la balle
+const float PG_ACCELERATION       = 8;      // Accelleration de la balle a chaque tir, si ACCELERATION = 10 on augmente la vitesse de 10 pourcent a chaque tir
 
-const int   PG_HIT_ZONE         = 75;   // Nombre de LED pendant lesquelles on peut renvoyer la balle
-const int   PG_MAX_SCORE        = 3;    // Score a obtenir pour gagner la partie
+const int   PG_HIT_ZONE           = 75;     // Nombre de LED pendant lesquelles on peut renvoyer la balle
+const int   PG_MAX_SCORE          = 3;      // Score a obtenir pour gagner la partie
+const int   PG_SCORE_SIZE         = 5;      // Taille d'un point de score en nombre de leds
 
-const CRGB  PG_PLAYER1_COLOR = ROUGE;   // Couleur player 1
-const CRGB  PG_PLAYER2_COLOR = BLEU;    // Couleur player 2
-const CRGB  PG_BALL_COLOR = BLANC;      // Couleur de la balle
+const CRGB  PG_PLAYER1_COLOR      = ROUGE;  // Couleur player 1
+const CRGB  PG_PLAYER2_COLOR      = BLEU;   // Couleur player 2
+const CRGB  PG_BALL_COLOR         = BLANC;  // Couleur de la balle
 
 /*
    Variables Pong
@@ -20,7 +21,7 @@ const CRGB  PG_BALL_COLOR = BLANC;      // Couleur de la balle
 const int PG_PLAYER1 = 0;
 const int PG_PLAYER2 = 1;
 
-int nextPlayer;
+int nextPlayer = PG_PLAYER1;
 int lastWinner;
 
 float ballSpeed = PG_BALL_SPEED;   // Vitesse de la balle
@@ -35,40 +36,93 @@ int exchangesCounter = 0;
 */
 
 // Fonction permettant de changer la couleur d'une LED relativement au player 1 ou 2
-void setLedColor(int player, int pos, CRGB color)
+void setLedColor(int player, int pos, int len, CRGB color)
 {
   if (player == PG_PLAYER1)
   {
-    leds[pos] = color / (LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
+    for (int i = 0; i < len; i++)
+    {
+      if (pos + i < LEDS_NB)
+      {
+        leds[pos + i] = color / (LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
+      }
+    }
   }
   else // player == PLAYER2
   {
-    leds[LEDS_NB - pos - 1] = color / (LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
+    for (int i = 0; i < len; i++)
+    {
+      if (LEDS_NB - 1 - (pos + i) >= 0)
+      {
+        leds[LEDS_NB - 1 - (pos + i)] = color / (LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
+      }
+    }
   }
 }
 // Fonction permettant de changer la couleur d'une LED
-void setLedColor(int pos, CRGB color)
+void setLedColor(int pos, int len, CRGB color)
 {
-  leds[pos] = color / (LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
+  for (int i = 0; i < len; i++)
+  {
+    if (pos + i < LEDS_NB)
+    {
+      leds[pos + i] = color / (LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
+    }
+  }
 }
 
 // Fonction servant a afficher les scores
 void showScore()
 {
+  // On regarde si la partie est terminee
+  if (player1Score == PG_MAX_SCORE || player2Score == PG_MAX_SCORE)
+  {
+    // Selection couleur gagnante
+    CRGB winnerColor = player1Score == PG_MAX_SCORE ? PG_PLAYER1_COLOR : PG_PLAYER2_COLOR;
+
+    // Clignottement couleurs
+    for (int i = 0; i < 3; i++)
+    {
+      FastLED.clear();
+      fill_solid(leds, LEDS_NB, winnerColor / (32 * LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV));
+      FastLED.show();
+      delay(1000);
+
+      FastLED.clear();
+      FastLED.show();
+      delay(1000);
+    }
+
+    state = Demo;
+
+    // On reinitialise les scores
+    player1Score = 0;
+    player2Score = 0;
+
+    // On reinitialise le prochain player
+    nextPlayer = PG_PLAYER1;
+
+    // On reinitialise la position
+    ballPosition = 1.0f;
+
+    // On reinitialise la vitesse
+    ballSpeed = PG_BALL_SPEED;
+
+    // On reinitialise le compteur
+    exchangesCounter = 0;
+    displayDigits.showNumberDec(exchangesCounter, false);
+
+    return;
+  }
+
   // On commence par effacer toutes les couleurs de led
   FastLED.clear();
 
   // On allume le nombre de led correspondant au score du player 1
-  for (int i = 0; i < player1Score; i++)
-  {
-    setLedColor(PG_PLAYER1, LEDS_NB / 2 - (i + 1), PG_PLAYER1_COLOR);
-  }
+  setLedColor(PG_PLAYER1, LEDS_NB / 2 - player1Score * PG_SCORE_SIZE, player1Score * PG_SCORE_SIZE, PG_PLAYER1_COLOR);
 
   // On allume le nombre de led correspondant au score du player 2
-  for (int i = 0; i < player2Score; i++)
-  {
-    setLedColor(PG_PLAYER2, LEDS_NB / 2 - (i + 1), PG_PLAYER2_COLOR);
-  }
+  setLedColor(PG_PLAYER2, LEDS_NB / 2 - player2Score * PG_SCORE_SIZE, player2Score * PG_SCORE_SIZE, PG_PLAYER2_COLOR);
 
   // On envoie les nouvelles couleurs a la bande de led
   FastLED.show();
@@ -79,13 +133,13 @@ void showScore()
     for (int i = 0; i < 3; i++)
     {
       // On eteint la derniere LED pendant 0.5s
-      delay(500);
-      setLedColor(PG_PLAYER1, LEDS_NB / 2 - player1Score, NOIR);
+      delay(1000);
+      setLedColor(PG_PLAYER1, LEDS_NB / 2 - player1Score * PG_SCORE_SIZE, PG_SCORE_SIZE, NOIR);
       FastLED.show();
 
       // On allume la derniere LED pendant 0.5s
-      delay(500);
-      setLedColor(PG_PLAYER1, LEDS_NB / 2 - player1Score, PG_PLAYER1_COLOR);
+      delay(1000);
+      setLedColor(PG_PLAYER1, LEDS_NB / 2 - player1Score * PG_SCORE_SIZE, PG_SCORE_SIZE, PG_PLAYER1_COLOR);
       FastLED.show();
     }
   }
@@ -94,41 +148,19 @@ void showScore()
     for (int i = 0; i < 3; i++)
     {
       // On eteint la derniere LED pendant 0.5s
-      delay(500);
-      setLedColor(PG_PLAYER2, LEDS_NB / 2 - player2Score, NOIR);
+      delay(1000);
+      setLedColor(PG_PLAYER2, LEDS_NB / 2 - player2Score * PG_SCORE_SIZE, PG_SCORE_SIZE, NOIR);
       FastLED.show();
 
       // On allume la derniere LED pendant 0.5s
-      delay(500);
-      setLedColor(PG_PLAYER2, LEDS_NB / 2 - player2Score, PG_PLAYER2_COLOR);
+      delay(1000);
+      setLedColor(PG_PLAYER2, LEDS_NB / 2 - player2Score * PG_SCORE_SIZE, PG_SCORE_SIZE, PG_PLAYER2_COLOR);
       FastLED.show();
     }
   }
 
-  // Si la partie est terminee on va a l'affichage de fin
-  if (player1Score == PG_MAX_SCORE || player2Score == PG_MAX_SCORE)
-  {
-    state = Demo;
-
-    // On reinitialise les scores
-    player1Score = 0;
-    player2Score = 0;
-
-    // On reinitialise la vitesse
-    ballSpeed = PG_BALL_SPEED;
-
-    // On reinitialise le compteur
-    exchangesCounter = 0;
-    displayDigits.showNumberDec(exchangesCounter, false);
-
-    // On reinitialise les leds
-    FastLED.clear();
-  }
-  // Sinon on reprend le jeu
-  else
-  {
-    ballSpeed = PG_BALL_SPEED;
-  }
+  // On reprend le jeu
+  ballSpeed = PG_BALL_SPEED;
 }
 
 
@@ -147,7 +179,7 @@ void pongGameLoop()
   if (nextPlayer == PG_PLAYER1)
   {
     // On regarde si le player a appuye sur son bouton et si le delai de debut de jeu est passe
-    if (digitalRead(PLAYER_BUTTON_PINS[0]) == LOW && currentMillis - beginTimer > 500)
+    if (digitalRead(PLAYER_BUTTON_PINS[0]) == LOW && currentMillis - beginTimer > 1000)
     {
       // Si la balle est hors de la zone de tir, l'autre player marque un point
       if (ballLed >= PG_HIT_ZONE)
@@ -214,10 +246,10 @@ void pongGameLoop()
   else // player == PLAYER2
   {
     // On regarde si le player a appuye sur son bouton et si le delai de debut de jeu est passe
-    if (digitalRead(PLAYER_BUTTON_PINS[1]) == LOW && currentMillis - beginTimer > 500)
+    if (digitalRead(PLAYER_BUTTON_PINS[1]) == LOW && currentMillis - beginTimer > 1000)
     {
       // Si la balle est hors de la zone de tir, l'autre player marque un point
-      if (ballLed < LEDS_NB - PG_HIT_ZONE)
+      if (ballLed + PG_BALL_SIZE < LEDS_NB - PG_HIT_ZONE)
       {
         player1Score += 1;
         lastWinner = PG_PLAYER1;
@@ -258,7 +290,7 @@ void pongGameLoop()
     ballPosition += ballSpeed * (currentMillis - lastMillis) * 0.001f;
 
     // On regarde si la balle est sortie de la zone
-    if (ballPosition >= 1.0f)
+    if (ballPosition + float(PG_BALL_SIZE) / LEDS_NB >= 1.0f)
     {
       // Si oui le player 1 marque un point
       player1Score += 1;
@@ -284,24 +316,17 @@ void pongGameLoop()
   FastLED.clear();
 
   // Ensuite on allume faiblement les LEDs correspondant a la zone de chaque cote
-  for (int i = 0; i < PG_HIT_ZONE; i++)
-  {
-    // On allume de chaque cote
-    setLedColor(PG_PLAYER1, i, PG_PLAYER1_COLOR / 10);  // On divise la couleur par 10 pour la rendre 10 fois moins puissante
-    setLedColor(PG_PLAYER2, i, PG_PLAYER2_COLOR / 10);
-  }
+  // On allume de chaque cote
+  setLedColor(PG_PLAYER1, 0, PG_HIT_ZONE, PG_PLAYER1_COLOR / 10);  // On divise la couleur par 10 pour la rendre 10 fois moins puissante
+  setLedColor(PG_PLAYER2, 0, PG_HIT_ZONE, PG_PLAYER2_COLOR / 10);
+
 
   // Ensuite on allume faiblement les LEDs correspondant aux scores
   // Pour le player 1
-  for (int i = 0; i < player1Score; i++)
-  {
-    setLedColor(PG_PLAYER1, LEDS_NB / 2 - (i + 1), PG_PLAYER1_COLOR / 15);
-  }
+  setLedColor(PG_PLAYER1, LEDS_NB / 2 - player1Score * PG_SCORE_SIZE, player1Score * PG_SCORE_SIZE, PG_PLAYER1_COLOR / 15);
+
   // Pour le player 2
-  for (int i = 0; i < player2Score; i++)
-  {
-    setLedColor(PG_PLAYER2, LEDS_NB / 2 - (i + 1), PG_PLAYER2_COLOR / 15);
-  }
+  setLedColor(PG_PLAYER2, LEDS_NB / 2 - player2Score * PG_SCORE_SIZE, player2Score * PG_SCORE_SIZE, PG_PLAYER2_COLOR / 15);
 
   // Ensuite on actualise la position de la balle
   // On donne la couleur de la led en fonction de si la balle est dans la zone d'un player ou non
@@ -309,17 +334,17 @@ void pongGameLoop()
   // Si la balle est dans le camp d'un des player, elle est rouge.
   if (ballLed < PG_HIT_ZONE || ballLed >= LEDS_NB - PG_HIT_ZONE)
   {
-    setLedColor(ballLed, ROUGE);
+    setLedColor(ballLed, PG_BALL_SIZE, ROUGE);
   }
   // Si elle en est proche, elle est jaune
   else if (ballLed < 2 * PG_HIT_ZONE || ballLed >= LEDS_NB - 2 * PG_HIT_ZONE)
   {
-    setLedColor(ballLed, JAUNE);
+    setLedColor(ballLed, PG_BALL_SIZE, JAUNE);
   }
   // Sinon la balle a sa couleur par defaut
   else
   {
-    setLedColor(ballLed, PG_BALL_COLOR);
+    setLedColor(ballLed, PG_BALL_SIZE, PG_BALL_COLOR);
   }
 
   // On envoie la couleur des leds a la bande de leds

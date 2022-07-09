@@ -1,15 +1,16 @@
 /*
      Parametres Tir a la corde
 */
-const int TAC_LEDS_INTENSITY_DIV = 1;    // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le tir a la corde
+const int   TAC_LEDS_INTENSITY_DIV = 1;          // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le tir a la corde
 
-const float TAC_INCREMENT = 0.05;   // De combien avance la corde lorsqu'on appuie sur le bouton
-const float TAC_ROPE_SMOOTH = 1.0;  // Parametre servant a lisser la position de la corde
+const float TAC_INCREMENT = 0.05;                // De combien avance la corde lorsqu'on appuie sur le bouton
+const float TAC_ROPE_SMOOTH = 1.0;               // Parametre servant a lisser la position de la corde
+const int   TAC_ROPE_SIZE = 6;      
 
-const float TAC_WAVE_LENGTH = 0.2;  // Taille des ondes
-const float TAC_WAVE_SPEED =  1.0;  // Vitesse des ondes
+const float TAC_WAVE_LENGTH = 0.2;               // Taille des ondes
+const float TAC_WAVE_SPEED =  1.0;               // Vitesse des ondes
 
-const CRGB TAC_PLAYER_COLORS[2] = {CYAN, ROSE};
+const CRGB  TAC_PLAYER_COLORS[2] = {CYAN, ROSE}; // Couleur de chaque player
 
 /*
       VVariables de fonctionnement du tir a la corde
@@ -95,7 +96,18 @@ void tacGameLoop()
   // On regarde si player 1 a gagne
   if (displayedRopePosition >= 1.0f)
   {
-    lastWinner = TAC_PLAYER1;
+    for (int i = 0; i < 3; i++)
+    {
+      FastLED.clear();
+      fill_solid(leds, LEDS_NB, TAC_PLAYER_COLORS[0] / (32 * LEDS_INTENSITY_DIV * TAC_LEDS_INTENSITY_DIV));
+      FastLED.show();
+      delay(1000);
+
+      FastLED.clear();
+      FastLED.show();
+      delay(1000);
+    }
+    
     state = Demo;
     beginTimer = millis();
 
@@ -108,7 +120,18 @@ void tacGameLoop()
   // On regarde si player 2 a gagne
   else if (displayedRopePosition <= 0.0f)
   {
-    lastWinner = TAC_PLAYER2;
+    for (int i = 0; i < 3; i++)
+    {
+      FastLED.clear();
+      fill_solid(leds, LEDS_NB, TAC_PLAYER_COLORS[1] / (32 * LEDS_INTENSITY_DIV * TAC_LEDS_INTENSITY_DIV));
+      FastLED.show();
+      delay(1000);
+
+      FastLED.clear();
+      FastLED.show();
+      delay(1000);
+    }
+    
     state = Demo;
     beginTimer = millis();
 

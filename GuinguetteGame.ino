@@ -29,8 +29,8 @@ const int DISPLAY_DIO_PIN       = 23;               // Pin DIO de l'afficheur
 /*
    Parametres generaux
 */
-const int LEDS_NB                 = 300;  // Nombre de LEDs sur la guirlande
-const int LEDS_INTENSITY_DIV      = 1;     // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite globale
+const int LEDS_NB               = 300;              // Nombre de LEDs sur la guirlande
+const int LEDS_INTENSITY_DIV    = 1;                // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite globale
 
 /*
    Variables de fonctionnement du jeu

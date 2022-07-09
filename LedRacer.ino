@@ -1,14 +1,14 @@
 /*
    Parametres Led Racer
 */
-const int LR_LEDS_INTENSITY_DIV = 1;  // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le led racer
+const int LR_LEDS_INTENSITY_DIV = 1;                          // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le led racer
 
-const CRGB LR_PLAYER_COLORS[4] = {VERT, ROUGE, BLEU, JAUNE}; // Couleurs des LEDs
+const CRGB LR_PLAYER_COLORS[4]  = {VERT, ROUGE, BLEU, JAUNE}; // Couleurs des LEDs
 
-const int   LR_MAX_TURNS     = 3;     // Nombre de tours necessaires pour gagner
-const float LR_ACCELERATION  = 0.03;  // Correspond a la vitesse que l'on gagne en appuyant sur notre bouton
-const float LR_DRAG          = 0.5;   // Correspond aux LR_DRAG exerces sur chaque personne
-const int   LR_PLAYER_SIZE   = 5;     // Taille d'une voiture en nombre de led
+const int   LR_MAX_TURNS        = 3;                          // Nombre de tours necessaires pour gagner
+const float LR_ACCELERATION     = 0.03;                       // Correspond a la vitesse que l'on gagne en appuyant sur notre bouton
+const float LR_DRAG             = 0.5;                        // Correspond aux LR_DRAG exerces sur chaque personne
+const int   LR_PLAYER_SIZE      = 5;                          // Taille d'une voiture en nombre de led
 
 /*
     Variables Led racer
@@ -26,18 +26,16 @@ struct LedRacerPlayer {
 LedRacerPlayer ledRacerPlayers[4] = { { 0 } };
 
 /*
- * Variables menu de selection du led racer
- */
-const float LR_SELECT_SPEED = 0.3f;
- 
-float ledRacerSelectPositions[4] = { 0.3f, 0.2f, 0.1f, 0.0f };
+   Variables menu de selection du led racer
+*/
+//const float LR_SELECT_SPEED = 0.3f;
 
 /*
- * Fonctions Led racer
- */
+   Fonctions Led racer
+*/
 
 /*void ledRacerSelectDisplay()
-{
+  {
   // Time variables computation
   unsigned long ms = millis();
   float dt = (ms - lastMillis) * 0.001f;
@@ -45,7 +43,7 @@ float ledRacerSelectPositions[4] = { 0.3f, 0.2f, 0.1f, 0.0f };
 
   // Clear Led strip before printing
   FastLED.clear();
-  
+
   int ledPosition ;
   for (int playerId = 0; playerId < 4; playerId++)
   {
@@ -54,17 +52,17 @@ float ledRacerSelectPositions[4] = { 0.3f, 0.2f, 0.1f, 0.0f };
 
     // Print position with mask
     ledPosition = LEDS_NB * ledRacerSelectPositions[playerId];
-    
+
     for (int ledId = 0; ledId < LR_PLAYER_SIZE; ledId++)
     {
       if (ledPosition + ledId > 0.66f * LEDS_NB && ledPosition + ledId < LEDS_NB)
       {
         leds[ledPosition + ledId] = LR_PLAYER_COLORS[playerId] / (LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV);
       }
-      
+
     }
   }
-}*/
+  }*/
 
 void ledRacerSelectLoop()
 {
@@ -212,13 +210,13 @@ void ledRacerVictory(int playerId)
   for (int i = 0; i < 3; i++)
   {
     FastLED.clear();
-    fill_solid(leds, LEDS_NB, LR_PLAYER_COLORS[playerId] / 50);
+    fill_solid(leds, LEDS_NB, LR_PLAYER_COLORS[playerId] / (32 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV));
     FastLED.show();
-    delay(500);
+    delay(1000);
 
     FastLED.clear();
     FastLED.show();
-    delay(500);
+    delay(1000);
   }
 
   // On reinitialise les variables
@@ -241,7 +239,7 @@ void ledRacerBegin()
 {
   // Compte a rebours
   FastLED.clear();
-  fill_solid(leds, LEDS_NB, ROUGE / 50);
+  fill_solid(leds, LEDS_NB, ROUGE / (32 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV));
   FastLED.show();
   //tone(SPEAKER_PIN, 220, 500);
   delay(500);
@@ -250,7 +248,7 @@ void ledRacerBegin()
   FastLED.show();
   delay(500);
 
-  fill_solid(leds, LEDS_NB, ROUGE / 50);
+  fill_solid(leds, LEDS_NB, ROUGE / (32 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV));
   FastLED.show();
   //tone(SPEAKER_PIN, 220, 500);
   delay(500);
@@ -259,7 +257,7 @@ void ledRacerBegin()
   FastLED.show();
   delay(500);
 
-  fill_solid(leds, LEDS_NB, ORANGE / 50);
+  fill_solid(leds, LEDS_NB, ORANGE / (32 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV));
   FastLED.show();
   //tone(SPEAKER_PIN, 220, 500);
   delay(500);
@@ -268,7 +266,7 @@ void ledRacerBegin()
   FastLED.show();
   delay(500);
 
-  fill_solid(leds, LEDS_NB, VERT / 50);
+  fill_solid(leds, LEDS_NB, VERT / (32 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV));
   FastLED.show();
   //tone(SPEAKER_PIN, 440, 500);
   delay(200);
