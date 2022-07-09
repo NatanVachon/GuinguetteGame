@@ -1,6 +1,8 @@
-/*******************************
-     PARAMETRES TIR A LA CORDE
- *******************************/
+/*
+     Parametres Tir a la corde
+*/
+const int TAC_LEDS_INTENSITY_DIV = 1;    // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le tir a la corde
+
 const float TAC_INCREMENT = 0.05;   // De combien avance la corde lorsqu'on appuie sur le bouton
 const float TAC_ROPE_SMOOTH = 1.0;  // Parametre servant a lisser la position de la corde
 
@@ -9,9 +11,9 @@ const float TAC_WAVE_SPEED =  1.0;  // Vitesse des ondes
 
 const CRGB TAC_PLAYER_COLORS[2] = {CYAN, ROSE};
 
-/*******************************************************
-      VARIABLES DE FONCTIONNEMENT DU TIR A LA CORDE
- *******************************************************/
+/*
+      VVariables de fonctionnement du tir a la corde
+*/
 float ropePosition = 0.5;           // Position non lissee de la corde
 float displayedRopePosition = 0.5;  // Position lissee de la corde
 
@@ -19,9 +21,17 @@ float displayedRopePosition = 0.5;  // Position lissee de la corde
 float player1Waves[10] = { 0 };
 float player2Waves[10] = { 0 };
 
+// Compteur de clicks
+const unsigned long pushCounterDuration = 500; // Temps pendant lequel on compte les clicks avant d'actualiser l'affichage
+unsigned long pushCounterTimer = 0;
+int pushCounter = 0;
+
 const int TAC_PLAYER1 = 0;
 const int TAC_PLAYER2 = 1;
 
+/*
+   Fonctions tir a la corde
+*/
 
 void tacGameLoop()
 {
@@ -34,10 +44,12 @@ void tacGameLoop()
   if (ms - beginTimer < 1000)
     return;
 
-  bool player1Push = !digitalRead(PLAYER_BUTTON_PINS[0]); // TODO peut etre faire deux equipes
+  bool player1Push = !digitalRead(PLAYER_BUTTON_PINS[0]);
   bool player2Push = !digitalRead(PLAYER_BUTTON_PINS[1]);
+  bool player3Push = !digitalRead(PLAYER_BUTTON_PINS[2]);
+  bool player4Push = !digitalRead(PLAYER_BUTTON_PINS[3]);
 
-  if (playerButtons[0].press(player1Push))
+  if (playerButtons[0].press(player1Push) == Simple || playerButtons[1].press(player2Push) == Simple)
   {
     // On incremente la position de la corde
     ropePosition += TAC_INCREMENT;
@@ -51,8 +63,11 @@ void tacGameLoop()
         break;
       }
     }
+
+    // On incremente le compteur
+    pushCounter += 1;
   }
-  if (playerButtons[1].press(player2Push))
+  if (playerButtons[2].press(player3Push) == Simple || playerButtons[3].press(player4Push) == Simple)
   {
     // On incremente la position de la corde
     ropePosition -= TAC_INCREMENT;
@@ -66,6 +81,9 @@ void tacGameLoop()
         break;
       }
     }
+
+    // On incremente le compteur
+    pushCounter += 1;
   }
 
 
@@ -163,7 +181,7 @@ void tacGameLoop()
       ledLuminosity = 1.0f;
 
     // On actualise la valeur de luminosite de la led
-    leds[led] = TAC_PLAYER_COLORS[0] / int(1.0f / ledLuminosity) / 5;
+    leds[led] = TAC_PLAYER_COLORS[0] / int(1.0f / ledLuminosity) / (5 * LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
   }
 
   // On dessine la zone du player 2
@@ -188,10 +206,21 @@ void tacGameLoop()
       ledLuminosity = 1.0f;
 
     // On actualise la valeur de luminosite de la led
-    leds[led] = TAC_PLAYER_COLORS[1] / int(1.0f / ledLuminosity) / 5;
+    leds[led] = TAC_PLAYER_COLORS[1] / int(1.0f / ledLuminosity) / (5 * LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
   }
 
   // On actualise la led correspondant a la position de la corde
-  leds[ropeLedPosition] = BLANC;
+  leds[ropeLedPosition] = BLANC / (LEDS_INTENSITY_DIV * PG_LEDS_INTENSITY_DIV);
+
   FastLED.show();
+
+  // Actualisation de l'afficheur si necessaire
+  if (ms - pushCounterTimer >= pushCounterDuration)
+  {
+    displayDigits.showNumberDec((pushCounter * 60000) / pushCounterDuration, false); // Affichage en clicks par minute
+
+    // Reinitialisation pour le prochain affichage
+    pushCounter = 0;
+    pushCounterTimer = ms;
+  }
 }

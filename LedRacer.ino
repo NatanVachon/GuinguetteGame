@@ -1,15 +1,17 @@
 /*
    Parametres Led Racer
 */
+const int LR_LEDS_INTENSITY_DIV = 1;  // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite des leds dans le led racer
+
 const CRGB LR_PLAYER_COLORS[4] = {VERT, ROUGE, BLEU, JAUNE}; // Couleurs des LEDs
 
-const int   LR_MAX_TOURS     = 3;     // Nombre de tours necessaires pour gagner
+const int   LR_MAX_TURNS     = 3;     // Nombre de tours necessaires pour gagner
 const float LR_ACCELERATION  = 0.03;  // Correspond a la vitesse que l'on gagne en appuyant sur notre bouton
-const float LR_FROTTEMENTS   = 0.5;   // Correspond aux LR_FROTTEMENTS exerces sur chaque personne
-const int   LR_PLAYER_TAILLE = 5;     // Taille d'une voiture en nombre de led
+const float LR_DRAG          = 0.5;   // Correspond aux LR_DRAG exerces sur chaque personne
+const int   LR_PLAYER_SIZE   = 5;     // Taille d'une voiture en nombre de led
 
 /*
-    Led racer variables
+    Variables Led racer
 */
 // Variables de fonctionnement led racer
 struct LedRacerPlayer {
@@ -24,12 +26,15 @@ struct LedRacerPlayer {
 LedRacerPlayer ledRacerPlayers[4] = { { 0 } };
 
 /*
- * Led racer select menu variables
+ * Variables menu de selection du led racer
  */
 const float LR_SELECT_SPEED = 0.3f;
  
 float ledRacerSelectPositions[4] = { 0.3f, 0.2f, 0.1f, 0.0f };
 
+/*
+ * Fonctions Led racer
+ */
 
 /*void ledRacerSelectDisplay()
 {
@@ -50,11 +55,11 @@ float ledRacerSelectPositions[4] = { 0.3f, 0.2f, 0.1f, 0.0f };
     // Print position with mask
     ledPosition = LEDS_NB * ledRacerSelectPositions[playerId];
     
-    for (int ledId = 0; ledId < LR_PLAYER_TAILLE; ledId++)
+    for (int ledId = 0; ledId < LR_PLAYER_SIZE; ledId++)
     {
       if (ledPosition + ledId > 0.66f * LEDS_NB && ledPosition + ledId < LEDS_NB)
       {
-        leds[ledPosition + ledId] = LR_PLAYER_COLORS[playerId];
+        leds[ledPosition + ledId] = LR_PLAYER_COLORS[playerId] / (LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV);
       }
       
     }
@@ -102,16 +107,16 @@ void ledRacerSelectLoop()
     {
       if (ledRacerPlayers[playerId].isPressed)
       {
-        for (ledIdx = 0; ledIdx < LR_PLAYER_TAILLE; ledIdx++)
+        for (ledIdx = 0; ledIdx < LR_PLAYER_SIZE; ledIdx++)
         {
-          leds[2 * playerId * LR_PLAYER_TAILLE + ledIdx] = LR_PLAYER_COLORS[playerId];
+          leds[2 * playerId * LR_PLAYER_SIZE + ledIdx] = LR_PLAYER_COLORS[playerId] / (LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV);
         }
       }
       else
       {
-        for (ledIdx = 0; ledIdx < LR_PLAYER_TAILLE; ledIdx++)
+        for (ledIdx = 0; ledIdx < LR_PLAYER_SIZE; ledIdx++)
         {
-          leds[2 * playerId * LR_PLAYER_TAILLE + ledIdx] = LR_PLAYER_COLORS[playerId] / 4;
+          leds[2 * playerId * LR_PLAYER_SIZE + ledIdx] = LR_PLAYER_COLORS[playerId] / (4 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV);
         }
       }
     }
@@ -144,7 +149,7 @@ void ledRacerGameLoop()
 
     // PHYSICS COMPUTATION
     // Apply drag
-    player->speed -= LR_FROTTEMENTS * player->speed * dt;
+    player->speed -= LR_DRAG * player->speed * dt;
 
     // Compute position
     player->position += player->speed * dt;
@@ -156,7 +161,7 @@ void ledRacerGameLoop()
       player->turns += 1;
 
       // If enough turns are done, player wins
-      if (player->turns == LR_MAX_TOURS)
+      if (player->turns == LR_MAX_TURNS)
       {
         ledRacerVictory(playerId);
         return;
@@ -178,21 +183,26 @@ void ledRacerGameLoop()
       ledPosition = LEDS_NB * player->position;
 
       // Draw the entier car depending on car size and turn nb
-      for (int i = 0; i < LR_PLAYER_TAILLE * (player->turns + 1); i++)
+      for (int i = 0; i < LR_PLAYER_SIZE * (player->turns + 1); i++)
       {
         if (ledPosition + i < LEDS_NB)
         {
-          leds[ledPosition + i] += LR_PLAYER_COLORS[playerId] / 2;
+          leds[ledPosition + i] += LR_PLAYER_COLORS[playerId] / (2 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV);
         }
         else // ledPosition + i >= LEDS_NB
         {
-          leds[ledPosition + i - LEDS_NB] += LR_PLAYER_COLORS[playerId] / 2;
+          leds[ledPosition + i - LEDS_NB] += LR_PLAYER_COLORS[playerId] / (2 * LEDS_INTENSITY_DIV * LR_LEDS_INTENSITY_DIV);
         }
       }
     }
   }
 
   FastLED.show();
+
+  // Digit display update
+  // Display time in seconds
+  displayDigits.showNumberDecEx((ms - beginTimer) / 10);
+  displayDigits.showNumberDecEx(0, 0x20, true); // Dot display
 }
 
 // Fonction appelee lorsqu'une personne gagne
@@ -222,6 +232,8 @@ void ledRacerVictory(int playerId)
     ledRacerPlayers[playerId].isPresent = false;
     ledRacerPlayers[playerId].isPressed = false;
   }
+
+  displayDigits.showNumberDec(0, true);
 }
 
 
