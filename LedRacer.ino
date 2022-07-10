@@ -6,7 +6,7 @@ const int LR_LEDS_INTENSITY_DIV = 1;                          // Diviseur de l'i
 const CRGB LR_PLAYER_COLORS[4]  = {VERT, ROUGE, BLEU, JAUNE}; // Couleurs des LEDs
 
 const int   LR_MAX_TURNS        = 3;                          // Nombre de tours necessaires pour gagner
-const float LR_ACCELERATION     = 0.03;                       // Correspond a la vitesse que l'on gagne en appuyant sur notre bouton
+const float LR_ACCELERATION     = 0.09;                       // Correspond a la vitesse que l'on gagne en appuyant sur notre bouton
 const float LR_DRAG             = 0.5;                        // Correspond aux LR_DRAG exerces sur chaque personne
 const int   LR_PLAYER_SIZE      = 5;                          // Taille d'une voiture en nombre de led
 
@@ -199,8 +199,8 @@ void ledRacerGameLoop()
 
   // Digit display update
   // Display time in seconds
-  displayDigits.showNumberDecEx((ms - beginTimer) / 10);
-  displayDigits.showNumberDecEx(0, 0x20, true); // Dot display
+  //displayDigits.showNumberDecEx((ms - beginTimer) / 10, false);
+  displayDigits.showNumberDecEx((ms - beginTimer) / 100, 0x20, false);
 }
 
 // Fonction appelee lorsqu'une personne gagne
@@ -230,8 +230,6 @@ void ledRacerVictory(int playerId)
     ledRacerPlayers[playerId].isPresent = false;
     ledRacerPlayers[playerId].isPressed = false;
   }
-
-  displayDigits.showNumberDec(0, true);
 }
 
 

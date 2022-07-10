@@ -67,6 +67,7 @@ void tacGameLoop()
 
     // On incremente le compteur
     pushCounter += 1;
+    displayDigits.showNumberDec(pushCounter, false); // Affichage en clicks totaux
   }
   if (playerButtons[2].press(player3Push) == Simple || playerButtons[3].press(player4Push) == Simple)
   {
@@ -85,6 +86,7 @@ void tacGameLoop()
 
     // On incremente le compteur
     pushCounter += 1;
+    displayDigits.showNumberDec(pushCounter, false); // Affichage en clicks totaux
   }
 
 
@@ -238,12 +240,11 @@ void tacGameLoop()
   FastLED.show();
 
   // Actualisation de l'afficheur si necessaire
-  if (ms - pushCounterTimer >= pushCounterDuration)
+  /*if (ms - pushCounterTimer >= pushCounterDuration)
   {
-    displayDigits.showNumberDec((pushCounter * 60000) / pushCounterDuration, false); // Affichage en clicks par minute
+    displayDigits.showNumberDec(pushCounter, false); // Affichage en clicks totaux
 
     // Reinitialisation pour le prochain affichage
-    pushCounter = 0;
     pushCounterTimer = ms;
-  }
+  }*/
 }

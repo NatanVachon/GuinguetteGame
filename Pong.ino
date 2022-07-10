@@ -110,7 +110,7 @@ void showScore()
 
     // On reinitialise le compteur
     exchangesCounter = 0;
-    displayDigits.showNumberDec(exchangesCounter, false);
+    displayDigits.showNumberDec(0, true);
 
     return;
   }
@@ -158,6 +158,9 @@ void showScore()
       FastLED.show();
     }
   }
+
+  // On reinitialise le compteur d'echanges
+  exchangesCounter = 0;
 
   // On reprend le jeu
   ballSpeed = PG_BALL_SPEED;
@@ -210,6 +213,7 @@ void pongGameLoop()
 
         // On incremente le compteur d'echanges
         exchangesCounter += 1;
+        displayDigits.showNumberDec(exchangesCounter, false);
 
         // On joue la note de musique
         //tone(HAUT_PARLEUR_PIN, PONG_SOUND, 100);

@@ -45,6 +45,12 @@ void demoLoop()
   {
     // Go to game selection
     state = GameChoice;
+
+    // Delay to avoid second push
+    delay(800);
+
+    // Display game number
+    displayDigits.showNumberDec(1, true);
   }
 }
 

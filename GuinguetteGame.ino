@@ -18,7 +18,7 @@ const CRGB CYAN   = CRGB(0,   255, 255);
 
 /*
    Definition des branchements
-*/
+*/ 
 const int LEDS_PIN              = 13;               // Pin de donnees de la bande de led
 const int PLAYER_BUTTON_PINS[4] = {32, 33, 25, 26}; // Pins des boutons {PLAYER1, PLAYER2, PLAYER3, PLAYER4}
 const int MENU_SELECT_PIN       = 14;               // Pin du bouton de selection dans le menu
@@ -29,7 +29,7 @@ const int DISPLAY_DIO_PIN       = 23;               // Pin DIO de l'afficheur
 /*
    Parametres generaux
 */
-const int LEDS_NB               = 300;              // Nombre de LEDs sur la guirlande
+const int LEDS_NB               = 1800;              // Nombre de LEDs sur la guirlande
 const int LEDS_INTENSITY_DIV    = 1;                // Diviseur de l'intensite des leds, augmenter ce parametre pour reduire l'intensite globale
 
 /*
@@ -155,7 +155,8 @@ void loop() {
             break;
         }
 
-        Serial.print("Selected game: "); Serial.println(selectedGame);
+        // Display game number
+        displayDigits.showNumberDec(int(selectedGame) + 1, true);
       }
       break;
 
